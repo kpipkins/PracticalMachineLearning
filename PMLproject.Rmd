@@ -1,0 +1,89 @@
+---
+title: "Practical Machine Learning Course Project"
+author: "Kyle Pipkins"
+date: "October 24, 2014"
+output: html_document
+---
+Background
+---
+Extract from Practical Machine Learning Course Project Instructions:
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+
+Summary
+---
+Using a Random Forest model we were able to predict how well a barbell lift was performed with 99.39% accuracy (out of sample error on cross validation set). The original data contained 160 variables, after removing columns that introduced NAs and attributes unrelated to the prediction we ran our model on 52 variables. All predictions on the 20 test cases were correct.
+
+Acquiring and Cleaning Data
+---
+First thing first, we need to bring in our data, take a look and clean it up. I do this by passing the URL to a curl request. Next we remove columns with NA values and after taking a look at the data decide to remove columns 1 through 7 as they are not relevant to the prediction model (for example, they were the timestamp the activity was recorded or name of the participant.)
+
+```{r, echo=FALSE}
+library(lattice)
+library(ggplot2)
+library(caret)
+library(bitops)
+library(RCurl)
+library(randomForest)
+library(knitr)
+set.seed(13333)
+```
+```{r}
+## set the URLs and read in the data
+trainingURL <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+testURL <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+trainingData1 <- read.csv(textConnection(getURL(trainingURL)), na.strings = c("NA", ""))
+testData1 <- read.csv(textConnection(getURL(testURL)), na.strings = c("NA", ""))
+
+## remove columns with NA values
+trainingData2 <- trainingData1[,colSums(is.na(trainingData1))==0]
+testData2 <- testData1[,colSums(is.na(testData1))==0]
+
+## remove the first 7 columns
+drop <- c(1:7)
+trainingData3 <- trainingData2[,-drop]
+testData3 <- testData2[,-drop]
+```
+
+Building and Validating a Model
+---
+We were provided a test set but we still need a cross validation set; we do that here assigning 70% of the records to the training set and 30% to the validation set. Next, we set the control for a random forest model and run the model on the remainig 52 variables. Based on my level of knowledge of the data, and the number of variables we are fitting I've choosen to use Random Forest for its ability to efficiently yield an accurate prediction without producing common mistakes
+
+```{r}
+## partition data
+trainI <- createDataPartition(y = trainingData3$classe, p=0.7, list=FALSE)
+trainingData <- trainingData3[trainI,]
+crossValidationData <- trainingData3[-trainI,]
+## fit the model
+ctrl = trainControl(method='cv',number=5,repeats=2,returnResamp='none')
+modelFit <- train(trainingData$classe ~., data=trainingData, method="rf", trControl=ctrl)
+modelFit
+```
+
+Applying the Model
+---
+The model has a 99.2% in sample error rate and is ready to be applied to the cross validation set. The confusion matrix below depicts the accuracy at which we were able to predict the cross validation set. 
+```{r}
+## apply to cross validation data
+predictCrossValidation <- predict(modelFit, crossValidationData)
+confusionMatrix(predictCrossValidation, crossValidationData$classe)
+```
+
+Results and Submission
+---
+Our results are very good. The out of sample error rate is 99.39%. We are ready to apply this to our testing set and then we can submit our results. The submission yielded 100% accurate answers.
+
+```{r}
+predictTest <- predict(modelFit, testData3)
+answers <- as.character(predictTest)
+
+pml_write_files = function(x){
+  n = length(x)
+  for(i in 1:n){
+    filename = paste0("problem_id_",i,".txt")
+    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+  }
+}
+
+pml_write_files(answers)
+```
