@@ -2,9 +2,8 @@
 Practical Machine Learning Course Project
 ===
 Kyle Pipkins
----
 October 24, 2014
-
+---
 Background
 ---
 Extract from Practical Machine Learning Course Project Instructions:
@@ -18,7 +17,7 @@ Acquiring and Cleaning Data
 ---
 First thing first, we need to bring in our data, take a look and clean it up. I do this by passing the URL to a curl request. Next we remove columns with NA values and after taking a look at the data decide to remove columns 1 through 7 as they are not relevant to the prediction model (for example, they were the timestamp the activity was recorded or name of the participant.)
 
-```{r, echo=FALSE}
+```{r}
 library(lattice)
 library(ggplot2)
 library(caret)
@@ -28,6 +27,7 @@ library(randomForest)
 library(knitr)
 set.seed(13333)
 ```
+
 ```{r}
 ## set the URLs and read in the data
 trainingURL <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
@@ -50,7 +50,7 @@ Building and Validating a Model
 ---
 We were provided a test set but we still need a cross validation set; we do that here assigning 70% of the records to the training set and 30% to the validation set. Next, we set the control for a random forest model and run the model on the remainig 52 variables. Based on my level of knowledge of the data, and the number of variables we are fitting I've choosen to use Random Forest for its ability to efficiently yield an accurate prediction without producing common mistakes
 
-```{r}
+```{r, echo=TRUE}
 ## partition data
 trainI <- createDataPartition(y = trainingData3$classe, p=0.7, list=FALSE)
 trainingData <- trainingData3[trainI,]
@@ -63,8 +63,8 @@ modelFit
 
 Applying the Model
 ---
-The model has a 99.2% in sample error rate and is ready to be applied to the cross validation set. The confusion matrix below depicts the accuracy at which we were able to predict the cross validation set. 
-```{r}
+The model has a 99.2% in sample error rate and is ready to be applied to the cross validation set. The confusion matrix below depicts the accuracy at which we were able to predict the cross validation set. We are expecting an out of sample error close to 99%.
+```{r, echo=TRUE}
 ## apply to cross validation data
 predictCrossValidation <- predict(modelFit, crossValidationData)
 confusionMatrix(predictCrossValidation, crossValidationData$classe)

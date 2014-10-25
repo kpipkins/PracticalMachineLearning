@@ -55,14 +55,7 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 <div id="practical-machine-learning-course-project" class="section level1">
 <h1>Practical Machine Learning Course Project</h1>
-<div id="kyle-pipkins" class="section level2">
-<h2>Kyle Pipkins</h2>
-<p>October 24, 2014</p>
-</div>
-<div id="background" class="section level2">
-<h2>Background</h2>
-<p>Extract from Practical Machine Learning Course Project Instructions: Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a> (see the section on the Weight Lifting Exercise Dataset).</p>
-</div>
+<p>Kyle Pipkins October 24, 2014 — Background — Extract from Practical Machine Learning Course Project Instructions: Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a> (see the section on the Weight Lifting Exercise Dataset).</p>
 <div id="summary" class="section level2">
 <h2>Summary</h2>
 <p>Using a Random Forest model we were able to predict how well a barbell lift was performed with 99.39% accuracy (out of sample error on cross validation set). The original data contained 160 variables, after removing columns that introduced NAs and attributes unrelated to the prediction we ran our model on 52 variables. All predictions on the 20 test cases were correct.</p>
@@ -70,8 +63,16 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <div id="acquiring-and-cleaning-data" class="section level2">
 <h2>Acquiring and Cleaning Data</h2>
 <p>First thing first, we need to bring in our data, take a look and clean it up. I do this by passing the URL to a curl request. Next we remove columns with NA values and after taking a look at the data decide to remove columns 1 through 7 as they are not relevant to the prediction model (for example, they were the timestamp the activity was recorded or name of the participant.)</p>
+<pre class="r"><code>library(lattice)
+library(ggplot2)
+library(caret)
+library(bitops)
+library(RCurl)
+library(randomForest)</code></pre>
 <pre><code>## randomForest 4.6-10
 ## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre class="r"><code>library(knitr)
+set.seed(13333)</code></pre>
 <pre class="r"><code>## set the URLs and read in the data
 trainingURL &lt;- &quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;
 testURL &lt;- &quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&quot;
@@ -113,16 +114,16 @@ modelFit</code></pre>
 ## Resampling results across tuning parameters:
 ## 
 ##   mtry  Accuracy  Kappa  Accuracy SD  Kappa SD
-##    2    1         1      7e-04        9e-04   
-##   27    1         1      1e-03        2e-03   
-##   52    1         1      2e-03        3e-03   
+##    2    0.991     0.988  0.00068      0.000861
+##   27    0.991     0.988  0.00148      0.001870
+##   52    0.984     0.980  0.00224      0.002828
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
 ## The final value used for the model was mtry = 27.</code></pre>
 </div>
 <div id="applying-the-model" class="section level2">
 <h2>Applying the Model</h2>
-<p>The model has a 99.2% in sample error rate and is ready to be applied to the cross validation set. The confusion matrix below depicts the accuracy at which we were able to predict the cross validation set.</p>
+<p>The model has a 99.2% in sample error rate and is ready to be applied to the cross validation set. The confusion matrix below depicts the accuracy at which we were able to predict the cross validation set. We are expecting an out of sample error close to 99%.</p>
 <pre class="r"><code>## apply to cross validation data
 predictCrossValidation &lt;- predict(modelFit, crossValidationData)
 confusionMatrix(predictCrossValidation, crossValidationData$classe)</code></pre>
@@ -137,26 +138,26 @@ confusionMatrix(predictCrossValidation, crossValidationData$classe)</code></pre>
 ##          E    1    0    0    0 1077
 ## 
 ## Overall Statistics
-##                                         
-##                Accuracy : 0.992         
-##                  95% CI : (0.989, 0.994)
-##     No Information Rate : 0.284         
-##     P-Value [Acc &gt; NIR] : &lt;2e-16        
-##                                         
-##                   Kappa : 0.99          
-##  Mcnemar's Test P-Value : NA            
+##                                           
+##                Accuracy : 0.992           
+##                  95% CI : (0.9894, 0.9941)
+##     No Information Rate : 0.2845          
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+##                                           
+##                   Kappa : 0.9899          
+##  Mcnemar's Test P-Value : NA              
 ## 
 ## Statistics by Class:
 ## 
 ##                      Class: A Class: B Class: C Class: D Class: E
-## Sensitivity             0.997    0.987    0.994    0.983    0.995
-## Specificity             0.998    0.999    0.996    0.998    1.000
-## Pos Pred Value          0.994    0.995    0.980    0.991    0.999
-## Neg Pred Value          0.999    0.997    0.999    0.997    0.999
-## Prevalence              0.284    0.194    0.174    0.164    0.184
-## Detection Rate          0.284    0.191    0.173    0.161    0.183
-## Detection Prevalence    0.285    0.192    0.177    0.163    0.183
-## Balanced Accuracy       0.997    0.993    0.995    0.991    0.998</code></pre>
+## Sensitivity            0.9970   0.9868   0.9942   0.9834   0.9954
+## Specificity            0.9976   0.9987   0.9957   0.9982   0.9998
+## Pos Pred Value         0.9940   0.9947   0.9798   0.9906   0.9991
+## Neg Pred Value         0.9988   0.9968   0.9988   0.9968   0.9990
+## Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
+## Detection Rate         0.2836   0.1910   0.1733   0.1611   0.1830
+## Detection Prevalence   0.2853   0.1920   0.1769   0.1626   0.1832
+## Balanced Accuracy      0.9973   0.9928   0.9949   0.9908   0.9976</code></pre>
 </div>
 <div id="results-and-submission" class="section level2">
 <h2>Results and Submission</h2>
