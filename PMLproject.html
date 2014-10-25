@@ -162,18 +162,6 @@ confusionMatrix(predictCrossValidation, crossValidationData$classe)</code></pre>
 <div id="results-and-submission" class="section level2">
 <h2>Results and Submission</h2>
 <p>Our results are very good. The out of sample error rate is 99.39%. We are ready to apply this to our testing set and then we can submit our results. The submission yielded 100% accurate answers.</p>
-<pre class="r"><code>predictTest &lt;- predict(modelFit, testData3)
-answers &lt;- as.character(predictTest)
-
-pml_write_files = function(x){
-  n = length(x)
-  for(i in 1:n){
-    filename = paste0(&quot;problem_id_&quot;,i,&quot;.txt&quot;)
-    write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
-  }
-}
-
-pml_write_files(answers)</code></pre>
 </div>
 </div>
 

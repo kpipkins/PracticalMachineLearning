@@ -17,7 +17,7 @@ Acquiring and Cleaning Data
 ---
 First thing first, we need to bring in our data, take a look and clean it up. I do this by passing the URL to a curl request. Next we remove columns with NA values and after taking a look at the data decide to remove columns 1 through 7 as they are not relevant to the prediction model (for example, they were the timestamp the activity was recorded or name of the participant.)
 
-```{r}
+```{r, inlcude=FALSE}
 library(lattice)
 library(ggplot2)
 library(caret)
@@ -74,7 +74,7 @@ Results and Submission
 ---
 Our results are very good. The out of sample error rate is 99.39%. We are ready to apply this to our testing set and then we can submit our results. The submission yielded 100% accurate answers.
 
-```{r}
+```{r, include=FALSE, eval=FALSE}
 predictTest <- predict(modelFit, testData3)
 answers <- as.character(predictTest)
 
