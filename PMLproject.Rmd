@@ -1,9 +1,10 @@
+
+Practical Machine Learning Course Project
+===
+Kyle Pipkins
 ---
-title: "Practical Machine Learning Course Project"
-author: "Kyle Pipkins"
-date: "October 24, 2014"
-output: html_document
----
+October 24, 2014
+
 Background
 ---
 Extract from Practical Machine Learning Course Project Instructions:
